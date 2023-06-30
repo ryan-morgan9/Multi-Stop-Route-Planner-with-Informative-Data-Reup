@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Account{% endblock %}
+{% block body %}
+<div class="row mt-3">
+    <div class="col-sm-5">
+        <div class="container-fluid">
+            <form method="post">
+                <!-- Custom Starting Location -->
+                <div class="form-group">
+                    {% if address != None %}
+                    <p>Current Custom Starting Location: <b class="text-primary">{{ address[0] }}</b></p>
+                    {% else %}
+                    <p>No Custom Starting Location Set.</p>
+                    {% endif %}
+                    
+                    <label for="new_address">Set Custom Starting Location:</label>
+                    <div class="input-group">
+                        <input type="text" name="new_address" id="new_address" placeholder="New Custom Starting Location" class="form-control">
+                        <input type="submit" value="Set Address" class="btn btn-primary">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-sm-12">
+        <!-- All Saved Routes in a Table -->
+        <div class="container-fluid">
+            {% if routes != None %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Saved Routes</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th>Route ID</th>
+                            <th>Route</th>
+                            <th>Transport Mode</th>
+                            <th>Distance</th>
+                            <th>Load</th>
+                            <th>Delete</th>
+                        </tr>
+                        {% for route in routes %}
+                        <tr>
+                            <td>{{ route[0] }}</td>
+                            <td>{{ route[1] }}</td>
+                            <td>{{ route[2] }}</td>
+                            <td>{{ route[3] }} mi</td>
+                            <td>
+                                <!-- Load Route Function -->
+                                <form action="{{ url_for('loadroute') }}" method="post">
+                                    <input type="hidden" name="load_route" value="{{ route[1] }}">
+                                    <input type="hidden" name="transtype" value="{{ route[2] }}">
+                                    <input type="hidden" name="route_distance" value="{{ route[3] }}">
+                                    <button type="submit" class="btn btn-primary">Load Route</button>
+                                </form>
+                            </td>
+                            <td>
+                                <!-- Delete Route Function -->
+                                <form action="{{ url_for('deleteroute') }}" method="post">
+                                    <button type="submit" name="delete_route" value="{{ route[0] }}" class="btn btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <p>No Routes Saved</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

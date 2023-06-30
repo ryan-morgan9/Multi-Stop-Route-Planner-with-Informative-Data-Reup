@@ -1,0 +1,257 @@
+{% extends 'base.html' %} 
+
+{% block title %}Route{% endblock %} 
+
+{% block head %}
+<!-- Leaflet imports -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+  integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+  crossorigin=""
+/>
+
+<script
+  src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+  integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+  crossorigin=""
+></script>
+
+<script>
+  /* Show weather data */
+  function showWeather() {
+    var weatherDIVs = Array.from(document.getElementsByClassName("weatherDIV"));
+    var pollutionDIVs = Array.from(
+      document.getElementsByClassName("pollutionDIV")
+    );
+
+    weatherDIVs.forEach(function (item) {
+      if (item.style.display === "none") {
+        item.style.display = "block";
+      }
+    });
+    pollutionDIVs.forEach(function (politem) {
+      if (politem.style.display === "block") {
+        politem.style.display = "none";
+      }
+    });
+  }
+
+  /* Show Pollution data */
+  function showPollution() {
+    var weatherDIVs = Array.from(document.getElementsByClassName("weatherDIV"));
+    var pollutionDIVs = Array.from(
+      document.getElementsByClassName("pollutionDIV")
+    );
+
+    pollutionDIVs.forEach(function (politem) {
+      if (politem.style.display === "none") {
+        politem.style.display = "block";
+      }
+    });
+    weatherDIVs.forEach(function (item) {
+      if (item.style.display === "block") {
+        item.style.display = "none";
+      }
+    });
+  }
+</script>
+{% endblock %} 
+{% block body %}
+<div class="container-fluid">
+  <div class="row vh-100">
+    <div class="col-12 col-sm-12 col-md-4 col-lg-3 mt-2">
+      <!-- Shortest Route Summary Card -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">Summary</h5>
+        </div>
+        <div class="card-body">
+          <h6 class="card-subtitle text-secondary">Shortest route</h6>
+          <p><strong>{{ route|join(" -> ") }}</strong></p>
+          <h6 class="card-subtitle text-secondary">
+            Distance of shortest route
+          </h6>
+          <p><strong>{{ route_distance }} miles</strong></p>
+          <form action="{{ url_for('saveroute') }}" method="post">
+            <div class="container-fluid save-form">
+              {% if auth == True %}
+              <input type="hidden" name="wholeroute" id="wholeroute" value="{{ route }}"/>
+              <input type="hidden" name="trans_mode" id="trans_mode" value="{{ trans_mode }}"/>
+              <input type="hidden" name="route_distance" id="route_distance" value="{{ route_distance }}"/>
+              <input type="submit" value="Save Route" class="btn btn-secondary" />
+              {% else %}
+              <a href="{{ url_for('login') }}">
+                <p>Login to save route</p>
+              </a>
+              {% endif %}
+            </div>
+            <br>
+              <div>
+                <ul class="list-group">
+                  <li class="list-group-item">Coordinates are provided by <a href="https://geopy.readthedocs.io/en/stable/">GeoPy</a>.</li>
+                  <li class="list-group-item">Distance matrix is provided by <a href="https://openrouteservice.org/dev/#/api-docs/matrix">Openrouteservice</a>.</li>
+                </ul>
+              </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Informative Data View Selection -->
+      <div class="container-fluid mt-2">
+        <h6>Data View:</h6>
+        <div class="form-check form-check-inline">
+          <input
+          class="form-check-input"
+          type="radio"
+          name="infodata"
+          id="weather"
+          onclick="showWeather()"
+          checked
+          />
+          <label class="form-check-label" for="weather"> Weather </label>
+        </div>
+        
+        <div class="form-check form-check-inline">
+          <input
+          class="form-check-input"
+          type="radio"
+          name="infodata"
+          id="pollution"
+          onclick="showPollution()"
+          />
+          <label class="form-check-label" for="pollution"> Pollution </label>
+        </div>
+      </div>
+
+      <!-- Informative Data Cards -->
+      {% for point in route %}
+      <div class="card mb-2">
+        <div class="card-header">
+          <h5 class="card-title">{{ point }}</h5>
+        </div>
+        <div class="card-body">
+          <!-- Weather Data -->
+          <div class="weatherDIV" style="display: block;">
+            {% if stop_data[point][0] %}
+            <img src="http://openweathermap.org/img/wn/{{stop_data[point][0][0]["icon"] }}.png" alt="Weather Symbol">
+            <p>
+              {{ stop_data[point][0][0]["main"] }}: {{stop_data[point][0][0]["description"] }}
+            </p>
+            <p>{{ stop_data[point][0][1] }}°C</p>
+            <p>Weather data provided by <a href="https://openweathermap.org/">OpenWeather</a></p>
+            {% endif %}
+          </div>
+
+          <!-- Pollution Data -->
+          <div class="pollutionDIV" style="display: none;">
+            {% if 'main' in stop_data[point][1][0] %}
+            <p><strong>Air Quality Index:</strong> {{ stop_data[point][1][0]["main"]["aqi"] }}/5</p>
+            {% endif %}
+            <ul class="list-group">
+              {% if 'components' in stop_data[point][1][0] %}
+              <li class="list-group-item">CO: {{ stop_data[point][1][0]["components"]["co"] }} μg/m3</li>
+              <li class="list-group-item">NO: {{ stop_data[point][1][0]["components"]["no"] }} μg/m3</li>
+              <li class="list-group-item">NO2: {{ stop_data[point][1][0]["components"]["no2"] }} μg/m3</li>
+              <li class="list-group-item">O3: {{ stop_data[point][1][0]["components"]["o3"] }} μg/m3</li>
+              <li class="list-group-item">SO2: {{ stop_data[point][1][0]["components"]["so2"] }} μg/m3</li>
+              <li class="list-group-item">PM2.5: {{ stop_data[point][1][0]["components"]["pm2_5"] }} μg/m3</li>
+              <li class="list-group-item">PM10: {{ stop_data[point][1][0]["components"]["pm10"] }} μg/m3</li>
+              <li class="list-group-item">NH3: {{ stop_data[point][1][0]["components"]["nh3"] }} μg/m3</li>
+              {% endif %}
+            </ul>
+            <p>Pollution data provided by <a href="https://openweathermap.org/">OpenWeather</a></p>
+          </div>
+
+          <!-- Public Transport Route Data -->
+          {% if stop_data[point]|length > 3 %}
+          <div class="transitDIV">
+            <h6>Directions to next stop:</h6>
+            <ul class="list-group">
+            {% for route in stop_data[point][3]['routes'] %}
+              {% for trip in route['sections'] %}
+              
+                <li class="list-group-item">
+                  <div>
+                    {% if 'id' in trip %}
+                    <p class="transit-data"><strong>Trip {{ trip['id'] }}:</strong></p>
+                    {% endif %}
+                    {% if 'type' in trip %}
+                    <p class="transit-data"><strong>Type:</strong> {{ trip['type'] }}</p>
+                    {% endif %}
+                  </div>
+                  <div>
+                    {% if 'name' in trip['departure']['place'] %}
+                      <p class="transit-data"><strong>Departure Location:</strong> {{ trip['departure']['place']['name'] }}</p>
+                    {% endif %}
+                    {% if 'name' in trip['arrival']['place'] %}
+                      <p class="transit-data"><strong>Arrival Location:</strong> {{ trip['arrival']['place']['name'] }}</p>
+                    {% endif %}
+                  </div>
+                  {% if trip['type'] == 'transit' %}
+                    <ul>
+                      {% if 'name' in trip['transport'] %}
+                      <li><strong>Transport name:</strong> {{ trip['transport']['name'] }}</li>
+                      {% endif %}
+                      {% if 'category' in trip['transport'] %}
+                      <li><strong>Transport category:</strong> {{ trip['transport']['category'] }}</li>
+                      {% endif %}
+                      {% if 'headsign' in trip['transport'] %}
+                      <li><strong>Transport headsign:</strong> {{ trip['transport']['headsign'] }}</li>
+                      {% endif %}
+
+                      {% if 'shortName' in trip['transport'] %}
+                        {% if trip['transport']['shortName'] != trip['transport']['name'] %}
+                          <li><strong>Transport short name:</strong> {{ trip['transport']['shortName'] }}</li>
+                        {% endif %}
+                      {% endif %}
+                    
+                      {% if 'agency' in trip %}
+                        {% if 'name' in trip['agency'] %}
+                          <li><strong>Agency name:</strong> {{ trip['agency']['name'] }}</li>
+                        {% endif %}
+                        {% if 'website' in trip['agency'] %}
+                          <li><strong>Agency website:</strong> <a href="{{ trip['agency']['website'] }}">{{ trip['agency']['website'] }}</a></li>
+                        {% endif %}
+                      {% endif %}
+                    </ul>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+          <p style="text-align: center;"><strong>Public transit routes are provided by </strong><a href="https://developer.here.com/documentation/public-transit/dev_guide/index.html">Here</a></p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="col-12 col-sm-12 col-md-8 col-lg-9">
+      <!-- Map for Route Visualisation -->
+      <div id="map"></div>
+      <script>
+
+        var coordinates = {{ coordinates }};
+
+        /* Create map and tile */
+        var map = L.map('map').setView(coordinates[0], 13);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        let markers = []
+
+        /* Plot locations on the map */
+        for (let i = 0; i < coordinates.length; i++) {
+            markers.push(L.marker(coordinates[i]).addTo(map).bindPopup("<b>Marker</b>"));
+        }
+
+        /* Draw line between plotted locations */
+        var polyline = L.polyline(coordinates, {color: 'blue'}).addTo(map);
+      </script>
+    </div>
+  </div>
+</div>
+{% endblock %} 

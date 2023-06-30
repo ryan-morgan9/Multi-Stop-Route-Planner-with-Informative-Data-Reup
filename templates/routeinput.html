@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Pick stops{% endblock %}
+{% block head %}
+    <script>
+      /* Add additional text box to form */
+        function add() {
+            var txtbox = document.createElement("input");
+            var space = document.createElement("br");
+            txtbox.setAttribute("type", "text");
+            txtbox.setAttribute("name", "stop");
+            txtbox.setAttribute("placeholder", "Location");
+            txtbox.setAttribute("class", "form-control");
+            document.getElementById("stops").appendChild(txtbox);
+            document.getElementById("stops").appendChild(space);
+            return false;
+        };
+        
+        /* Disable starting location textbox if using a custom starting location from DB */
+        function disableStartLocation() {
+            let textbox = document.getElementById("start")
+            if (document.getElementById("useAddress").checked) {
+                textbox.disabled = true;
+                textbox.required = false;
+            } else {
+                textbox.disabled = false;
+                textbox.required = true;
+            }
+        };
+    </script>
+    
+{% endblock %}
+{% block body %}
+  <div class="container-fluid">
+    <div class="row vh-100">
+      <div class="col-12 col-sm-12 col-md-4 col-lg-3">
+        <!-- Shortest route details input form -->
+        <form name="routeform" action="{{ url_for('routeoutput') }}" method="post" class="form-group text-center  mt-3">
+          <h3>Select Transport Type</h3>
+          <div class="form-check form-check-inline mt-1">
+            <input type="radio" class="form-check-input" name="transtype" id="drive" value="drive" required>
+            <label for="drive" class="form-check-label">Drive</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input type="radio" class="form-check-input" name="transtype" id="transit" value="transit" required>
+            <label for="transit" class="form-check-label">Transit</label>
+          </div>
+    
+          <hr>
+
+          <h3>Pick Starting Location</h3>
+          <div class="mb-3 mt-3">
+            <input type="text" class="form-control" placeholder="Starting Location" name="start" id="start" required>
+            <div class="mt-1">
+              <input type="checkbox" class="form-check-input" id="useAddress" name="useAddress" onclick="disableStartLocation()">
+              <label for="useAddress" class="form-check-label">Use custom starting address</label>
+            </div>
+          </div>
+    
+          <hr>
+    
+          <h3>Pick Stops</h3>
+          <div id="stops" class="mt-3">
+              <input type="text" class="form-control" placeholder="Location" name="stop" required>
+              <br>
+          </div>
+          <button type="button" class="btn btn-secondary" id="addstop" onclick="add()">Add Another Stop</button>
+    
+          <hr>
+    
+          <button type="submit" class="btn btn-primary btn-block">Find Route</button>
+        </form>
+      </div>
+
+      <!-- Embedded Map -->
+      <div class="col-12 col-sm-12 col-md-8 col-lg-9">
+          <iframe width="100%" height="85%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
+          src="https://www.openstreetmap.org/export/embed.html?bbox=-23.532714843750004%2C48.40003249610685%2C9.096679687500002%2C60.108670463036&amp;layer=mapnik" 
+          style="border: 1px solid black"></iframe>
+          <br/>
+          <small><a href="https://www.openstreetmap.org/#map=6/54.674/-7.218">View Larger Map</a></small>
+      </div>
+    </div>
+  </div>  
+{% endblock %}

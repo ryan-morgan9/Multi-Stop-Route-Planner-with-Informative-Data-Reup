@@ -1,0 +1,43 @@
+.flash.success {
+  background-color: lightgreen;
+  text-align: center;
+  padding: 10px;
+}
+
+.flash.error {
+  background-color: rgb(248, 77, 77);
+  text-align: center;
+  padding: 10px;
+}
+
+.form-custom-width {
+  width: auto !important;
+}
+
+.weatherDIV {
+  text-align: center;
+}
+
+.pollutionDIV {
+  text-align: center;
+}
+
+.save-form {
+  text-align: center;
+}
+
+.transit-data {
+  margin: 0;
+}
+
+#map {
+  height: 95%;
+  width: 100%;
+}
+
+/* so map can still be seen on mobile devices */
+@media (max-width: 767px) {
+  #map {
+    height: 300px;
+  }
+}
