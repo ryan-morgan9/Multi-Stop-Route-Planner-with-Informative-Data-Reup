@@ -38,8 +38,7 @@ There's already a test account in the database for testing reasons:
 
 <img src="images/routeinput.png" width="1000"> 
 <img src="images/routeoutput1.png" width="1000">
-<img src="images/routeoutput2.png" width="475"> 
-<img src="images/routeoutput3.png" width="475">
+<img src="images/routeoutput2.png" width="400"> <img src="images/routeoutput3.png" width="400">
 <img src="images/routeoutput4.png" width="400">
 <img src="images/savedroutes.png" width="1000">
 <img src="images/customstart.png" width="500">
