@@ -1,7 +1,7 @@
 # Ryan Morgan
 # Multi-stop Route Planner with Informative Data.
 
-This is the final year project (digital systems project) for the multi-stop route planner project, which allows users to efficiently plan journeys and view informative data to inform thier travel decisions.
+This is the final year project (digital systems project) for the multi-stop route planner project, which allows users to efficiently plan journeys and view informative data to inform their travel decisions. The shortest route is found by executing a brute-force algorithm on a distance matrix. The goal is to mitigate the need to source valuable information from other websites or apps, allowing for efficient route planning and time saved.
 
 ## Prerequisites for running the project.
 **API keys are not included in this repository for security reasons.** Therefore, API keys are needed from these services:
